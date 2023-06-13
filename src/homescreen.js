@@ -17,10 +17,10 @@ function HomeScreen() {
     const [allocationData, setAllocationData] = useState([]);
 
     const navigate = useNavigate();
-    const userLogged = localStorage.getItem('userAvailable')
-    if (_.isEmpty(userLogged)) {
-        navigate('/')
-    }
+    // const userLogged = localStorage.getItem('userAvailable')
+    // if (_.isEmpty(userLogged)) {
+    //     navigate('/')
+    // }
     const [formData, setFormData] = useState({
         empid: '',
         projectid: []
