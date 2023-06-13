@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-localStorage.setItem('userAvailable', false);
 
 
 
@@ -36,16 +35,17 @@ function Login() {
       }
     })
       .then(response => {
-        console.log(response.data);
+        console.log('response',response.data);
         if (response.data.result == 'Processed') {
           navigate('/home')
-          localStorage.setItem('userAvailable', true);
+          // localStorage.setItem('userAvailable', true);
         } else {
           setAccessed(false)
         }
       })
       .catch(error => {
         console.error(error);
+        setAccessed(false)
       });
   };
 

@@ -163,28 +163,28 @@ function HomeScreen() {
             ) : (
                 <div className="screen-2">
                     {
-                        dataProcessed ?  <table className="table">
-                        <thead>
-                          <tr>
-                            <th>EmpID</th>
-                            <th>Employeename</th>
-                            <th>ProjectID's</th>
-                            <th>ProjectNames</th>
+                        dataProcessed ? <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>EmpID</th>
+                                    <th>Employeename</th>
+                                    <th>ProjectID's</th>
+                                    <th>ProjectNames</th>
 
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {allocationData.map((item, index) => (
-                            <tr key={index}>
-                              <td>{item.empid}</td>
-                              <td>{item.employeename}</td>
-                              <td>{[JSON.stringify(item.project_ids)]}</td>
-                              <td>{[JSON.stringify(item.projectname)]}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    : <h2>Failed </h2>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {allocationData.map((item, index) => (
+                                    <tr key={index}>
+                                        <td>{item.empid}</td>
+                                        <td>{item.employeename}</td>
+                                        <td>{[JSON.stringify(item.project_ids)]}</td>
+                                        <td>{[JSON.stringify(item.projectname)]}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                            : <h2>Failed </h2>
                     }
 
                     <div>
