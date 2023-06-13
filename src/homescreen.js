@@ -14,7 +14,13 @@ function HomeScreen() {
     const [dataProcessed, setDataProcessed] = useState(false)
     const [selectedValues, setSelectedValues] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
+    const [allocationData, setAllocationData] = useState([]);
+
     const navigate = useNavigate();
+    const userLogged = localStorage.getItem('userAvailable')
+    if (_.isEmpty(userLogged)) {
+        navigate('/')
+    }
     const [formData, setFormData] = useState({
         empid: '',
         projectid: []
@@ -44,20 +50,31 @@ function HomeScreen() {
             });
     }, []);
 
+    useEffect(() => {
+        axios
+            .get('http://localhost:5000/api/getEmployeeAllocation')
+            .then(response => {
+                console.log(JSON.parse(response.data))
+                setAllocationData(JSON.parse(response.data));
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }, []);
 
     const handleSubmit = e => {
         e.preventDefault();
         console.log(e.target)
         axios.post('http://localhost:5000/api/postEmployeeAllocation', formData)
-        .then(response => {
-          console.log(response.data);
-          if(response.data.result=='Processed'){
-            setDataProcessed(true)
-          }
-        })
-        .catch(error => {
-          console.error(error);
-        });
+            .then(response => {
+                console.log(response.data);
+                if (response.data.result == 'Processed') {
+                    setDataProcessed(true)
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
         console.log('formData', formData)
         setSubmitted(true);
     };
@@ -80,7 +97,7 @@ function HomeScreen() {
         setSelectedOptions(data)
         setFormData({ ...formData, empid: data.value });
     }
-    const viewPage =()=>{
+    const viewPage = () => {
         navigate('/')
     }
     return (
@@ -92,25 +109,25 @@ function HomeScreen() {
                         <div className="form-group">
                             <label>Employee:</label>
                             {/* <select name='empid' value={formData.empid} onChange={handleOptionChange} > */}
-                                {/* <option value="">Select an employee</option> */}
-                                {
-                                    employeeDataAvailable ? (
-                                        // employeeData.map((employee, index) => (
-                                        //     <option key={index} value={employee.id}>
-                                        //         {employee.name}
-                                        //     </option>
-                                        // ))
-                                        <Select name="empid"
-                                    options={employeeData}
-                                    placeholder="Select an Employee"
-                                    onChange={handleEmployeeSelect}
-                                    value={selectedOptions}
-                                    isMulti={false}
-                                />
+                            {/* <option value="">Select an employee</option> */}
+                            {
+                                employeeDataAvailable ? (
+                                    // employeeData.map((employee, index) => (
+                                    //     <option key={index} value={employee.id}>
+                                    //         {employee.name}
+                                    //     </option>
+                                    // ))
+                                    <Select name="empid"
+                                        options={employeeData}
+                                        placeholder="Select an Employee"
+                                        onChange={handleEmployeeSelect}
+                                        value={selectedOptions}
+                                        isMulti={false}
+                                    />
 
-                                    ) : (
-                                        <option disabled>Loading employees...</option>
-                                    )}
+                                ) : (
+                                    <option disabled>Loading employees...</option>
+                                )}
                             {/* </select> */}
                         </div>
                         <div className="form-group">
@@ -139,23 +156,44 @@ function HomeScreen() {
                         </div>
                         <button type="submit">Submit</button>
 
-                        
+
                     </form>
-                    
+
                 </div>
             ) : (
                 <div className="screen-2">
                     {
-                        dataProcessed ? <h2>Processed</h2> : <h2>Failed </h2>
+                        dataProcessed ?  <table className="table">
+                        <thead>
+                          <tr>
+                            <th>EmpID</th>
+                            <th>Employeename</th>
+                            <th>ProjectID's</th>
+                            <th>ProjectNames</th>
+
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {allocationData.map((item, index) => (
+                            <tr key={index}>
+                              <td>{item.empid}</td>
+                              <td>{item.employeename}</td>
+                              <td>{[JSON.stringify(item.project_ids)]}</td>
+                              <td>{[JSON.stringify(item.projectname)]}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    : <h2>Failed </h2>
                     }
 
                     <div>
                         <button onClick={resetForm}>Go Back</button>
                     </div>
-                    
-                    
+
+
                 </div>
-                
+
             )}
         </div>
     );
