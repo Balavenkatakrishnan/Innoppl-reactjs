@@ -38,7 +38,6 @@ function Login() {
         console.log('response',response.data);
         if (response.data.result == 'Processed') {
           navigate('/home')
-          // localStorage.setItem('userAvailable', true);
         } else {
           setAccessed(false)
         }

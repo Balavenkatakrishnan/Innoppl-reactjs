@@ -9,21 +9,24 @@ function HomeScreen() {
     const [submitted, setSubmitted] = useState(false);
     const [employeeData, setEmployeeData] = useState([]);
     const [projectData, setProjectData] = useState([]);
+    const [departmentData,setDepartmentData]=useState([]);
     const [employeeDataAvailable, setEmployeedataAvailable] = useState(false);
     const [projectDataAvailable, setProjectDataAvailable] = useState(false);
+    const [departmentDataAvailable, setDepartmentDataAvailable] = useState(false);
     const [dataProcessed, setDataProcessed] = useState(false)
     const [selectedValues, setSelectedValues] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
+    const [selectedDepartment, setSelectedDepartment] = useState([]);
     const [allocationData, setAllocationData] = useState([]);
-
     const navigate = useNavigate();
-    const userLogged = localStorage.getItem('userAvailable')
-    if (_.isEmpty(userLogged)) {
-        navigate('/')
-    }
+    // const userLogged = localStorage.getItem('userAvailable')
+    // if (_.isEmpty(userLogged)) {
+    //     navigate('/')
+    // }
     const [formData, setFormData] = useState({
         empid: '',
-        projectid: []
+        projectid: [],
+        departmentid:[]
     });
 
     useEffect(() => {
@@ -52,6 +55,19 @@ function HomeScreen() {
 
     useEffect(() => {
         axios
+            .get('http://localhost:5000/api/getDepartments')
+            .then(response => {
+                setDepartmentData(JSON.parse(response.data));
+                setDepartmentDataAvailable(true)
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }, []);
+
+
+    useEffect(() => {
+        axios
             .get('http://localhost:5000/api/getEmployeeAllocation')
             .then(response => {
                 console.log(JSON.parse(response.data))
@@ -65,10 +81,20 @@ function HomeScreen() {
     const handleSubmit = e => {
         e.preventDefault();
         console.log(e.target)
+        console.log(formData)
         axios.post('http://localhost:5000/api/postEmployeeAllocation', formData)
             .then(response => {
                 console.log(response.data);
                 if (response.data.result == 'Processed') {
+                    axios
+                    .get('http://localhost:5000/api/getEmployeeAllocation')
+                    .then(response => {
+                        console.log(JSON.parse(response.data))
+                        setAllocationData(JSON.parse(response.data));
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
                     setDataProcessed(true)
                 }
             })
@@ -84,6 +110,8 @@ function HomeScreen() {
         setDataProcessed(false)
         setSelectedOptions([])
         setSelectedValues([])
+        setAllocationData([])
+
 
     };
 
@@ -93,6 +121,15 @@ function HomeScreen() {
         setFormData({ ...formData, projectid: selectedProjectIds });
 
     }
+
+    const handleDepartmentSelect = (data) => {
+        setSelectedDepartment(data)
+        const selectedDepartments = data.map(option => option.value);
+        setFormData({ ...formData, departmentid: selectedDepartments });
+
+    }
+
+
     const handleEmployeeSelect = (data) => {
         setSelectedOptions(data)
         setFormData({ ...formData, empid: data.value });
@@ -154,6 +191,30 @@ function HomeScreen() {
                             {/* </select> */   console.log(selectedValues)}
 
                         </div>
+                        <div className="form-group">
+                            <label>Departments:</label>
+                            {/* <select name="projectid"  value={selectedValues} onChange={handleOptionChange} multiple > */}
+                            {/* Add "multiple" attribute to allow selecting multiple options */}
+                            {departmentDataAvailable ? (
+                                //   projectData.map((project, index) => (
+                                //     <option key={index} value={project.id}>
+                                //       {project.name}
+                                //     </option>
+                                //   ))
+                                <Select name="departmentid"
+                                    options={departmentData}
+                                    placeholder="Select the department"
+                                    onChange={handleDepartmentSelect}
+                                    value={selectedDepartment}
+                                    isMulti={true}
+                                />
+                            ) : (
+                                <option disabled>Loading Departments...</option>
+                            )}
+
+                            {/* </select> */   console.log(selectedDepartment)}
+
+                        </div>
                         <button type="submit">Submit</button>
 
 
@@ -163,28 +224,32 @@ function HomeScreen() {
             ) : (
                 <div className="screen-2">
                     {
-                        dataProcessed ? <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>EmpID</th>
-                                    <th>Employeename</th>
-                                    <th>ProjectID's</th>
-                                    <th>ProjectNames</th>
+                        dataProcessed ?  <table className="table">
+                        <thead>
+                          <tr>
+                            <th>EmpID</th>
+                            <th>Employeename</th>
+                            <th>ProjectID's</th>
+                            <th>ProjectNames</th>
+                            <th>Departmentname</th>
+                            <th>DepartmentID's</th>
 
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {allocationData.map((item, index) => (
-                                    <tr key={index}>
-                                        <td>{item.empid}</td>
-                                        <td>{item.employeename}</td>
-                                        <td>{[JSON.stringify(item.project_ids)]}</td>
-                                        <td>{[JSON.stringify(item.projectname)]}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                            : <h2>Failed </h2>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {allocationData.map((item, index) => (
+                            <tr key={index}>
+                              <td>{item.empid}</td>
+                              <td>{item.employeename}</td>
+                              <td>{[JSON.stringify(item.project_ids.filter((value) => value !== null))]}</td>
+                              <td>{[JSON.stringify(item.project_name.filter((value) => value !== null))]}</td>
+                              <td>{JSON.stringify(item.departmentname.filter((value) => value !== null))}</td>
+                              <td>{[JSON.stringify(item.departmentids.filter((value) => value !== null))]}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    : <h2>Failed </h2>
                     }
 
                     <div>
